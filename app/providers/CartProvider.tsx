@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id)
       if (existing) {
-        if (existing.quantity < product.stock) {
+        if (existing.quantity < product.existencia) {
           return prev.map(item =>
             item.id === product.id
               ? { ...item, quantity: item.quantity + 1 }
@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (newQuantity <= 0) {
         return prev.filter(i => i.id !== id)
       }
-      if (newQuantity > item.stock) {
+      if (newQuantity > item.existencia) {
         return prev
       }
       return prev.map(i =>
@@ -67,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const totalPrice = cart.reduce((sum, item) => sum + (item.costo_unidad * item.quantity), 0)
 
   const toggleCart = () => setIsOpen(prev => !prev)
   const openCart = () => setIsOpen(true)

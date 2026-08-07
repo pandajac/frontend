@@ -32,7 +32,7 @@ function HomeContent() {
     const product = products.find(p => p.id === productId)
     if (product) {
       addToCart(product)
-      showToast(`Agregado a cotización: ${product.desc}`)
+      showToast(`Agregado a cotización: ${product.descripcion}`)
     }
   }
 

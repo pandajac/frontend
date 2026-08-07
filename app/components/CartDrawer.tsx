@@ -24,7 +24,7 @@ export function CartDrawer() {
     let message = "⬛ *NUEVA COTIZACIÓN PANDAJAC*\n\nMe interesa adquirir las siguientes piezas en liquidación:\n\n"
     
     cart.forEach(item => {
-      message += `▪️ ${item.quantity}x ${item.desc} \n  └ Ref: ${item.ref} - ${formatMoney(item.price * item.quantity)}\n\n`
+      message += `▪️ ${item.quantity}x ${item.descripcion} \n  └ Ref: ${item.referencia || 'N/A'} - ${formatMoney(item.costo_unidad * item.quantity)}\n\n`
     })
     
     message += `*Total Estimado:* ${formatMoney(totalPrice)}\n\n`
@@ -69,9 +69,9 @@ export function CartDrawer() {
             cart.map(item => (
               <div key={item.id} className="flex gap-4 items-center bg-white p-4 border border-gray-200 rounded-xl fade-in shadow-sm">
                 <div className="flex-grow">
-                  <p className="text-xs font-bold text-black leading-tight mb-1 uppercase">{item.desc}</p>
-                  <p className="text-[10px] text-gray-500 font-mono font-medium">REF: {item.ref}</p>
-                  <p className="text-sm font-black text-black mt-2">{formatMoney(item.price)}</p>
+                  <p className="text-xs font-bold text-black leading-tight mb-1 uppercase">{item.descripcion}</p>
+                  <p className="text-[10px] text-gray-500 font-mono font-medium">REF: {item.referencia || 'N/A'}</p>
+                  <p className="text-sm font-black text-black mt-2">{formatMoney(item.costo_unidad)}</p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-1">

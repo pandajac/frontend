@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCarouselSlides } from '@/app/hooks/useCarouselSlides'
 
 interface Slide {
   src: string
@@ -10,7 +11,8 @@ interface Slide {
   subtitle?: string
 }
 
-const slides: Slide[] = [
+// Fallback slides in case DB is empty or error
+const fallbackSlides: Slide[] = [
   { src: '/assets/img/carousel/1.webp', alt: 'Repuestos JAC Serie 1061', title: 'Serie 1061', subtitle: 'Motor y componentes principales' },
   { src: '/assets/img/carousel/2.webp', alt: 'Repuestos JAC Serie 1040', title: 'Serie 1040', subtitle: 'Transmisión y filtros' },
   { src: '/assets/img/carousel/3.webp', alt: 'Repuestos JAC Serie 1037', title: 'Serie 1037', subtitle: 'Embrague y suspensión' },
@@ -21,9 +23,15 @@ const slides: Slide[] = [
 ]
 
 export function HeroCarousel() {
+  const { slides: dbSlides, loading, error } = useCarouselSlides()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
+
+  // Use DB slides if available, otherwise fallback
+  const slides = dbSlides.length > 0 
+    ? dbSlides.map(s => ({ src: s.src, alt: s.alt, title: s.title, subtitle: s.subtitle }))
+    : fallbackSlides
 
   const goToSlide = useCallback((index: number) => {
     if (isAnimating || index === currentIndex) return
@@ -57,6 +65,24 @@ export function HeroCarousel() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [nextSlide, prevSlide])
 
+  // Reset index when slides change
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [slides.length])
+
+  if (loading && dbSlides.length === 0) {
+    return (
+      <header className="relative overflow-hidden bg-white py-12 md:py-20 border-b border-gray-200">
+        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto mb-4 animate-pulse" />
+          <div className="h-12 bg-gray-200 rounded w-3/4 mx-auto mb-4 animate-pulse" />
+          <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto animate-pulse" />
+        </div>
+      </header>
+    )
+  }
+
   return (
     <header className="relative overflow-hidden bg-white py-12 md:py-20 border-b border-gray-200">
       {/* Slides Container */}
@@ -88,7 +114,7 @@ export function HeroCarousel() {
       <button
         onClick={prevSlide}
         disabled={isAnimating}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 p-3 md:p-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg"
         aria-label="Slide anterior"
       >
         <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
@@ -97,15 +123,15 @@ export function HeroCarousel() {
       <button
         onClick={nextSlide}
         disabled={isAnimating}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 p-3 md:p-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg"
         aria-label="Slide siguiente"
       >
         <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
       </button>
 
       {/* Content Overlay */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center md:text-left max-w-3xl">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
+        <div className="text-center md:text-left max-w-3xl pointer-events-auto">
           <span className="inline-block py-1 px-3 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-semibold mb-4 shadow-sm border border-white/20">
             🔥 Últimas unidades disponibles
           </span>
@@ -117,7 +143,7 @@ export function HeroCarousel() {
           </p>
           
           {/* Slide Indicators */}
-          <div className="flex justify-center md:justify-start gap-2 mt-8">
+          <div className="flex justify-center md:justify-start gap-2 mt-8 relative z-20">
             {slides.map((_, index) => (
               <button
                 key={index}

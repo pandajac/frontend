@@ -1,10 +1,40 @@
-import { useState, useMemo } from 'react'
-import { products } from '@/app/data/products'
-import { ModelFilter } from '@/app/types'
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+import { createClient } from '@/app/lib/supabase/client'
+import { Product, ModelFilter } from '@/app/types'
 
 export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([])
   const [filter, setFilter] = useState<ModelFilter>('all')
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('model', { ascending: true })
+          .order('descripcion', { ascending: true })
+
+        if (error) throw error
+        setProducts(data || [])
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al cargar productos')
+        console.error('Error fetching products:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const filteredProducts = useMemo(() => {
     let filtered = products
@@ -16,13 +46,13 @@ export function useProducts() {
     if (search.trim() !== '') {
       const query = search.toLowerCase()
       filtered = filtered.filter(p =>
-        p.desc.toLowerCase().includes(query) ||
-        p.ref.toLowerCase().includes(query)
+        p.descripcion.toLowerCase().includes(query) ||
+        (p.referencia || '').toLowerCase().includes(query)
       )
     }
     
     return filtered
-  }, [filter, search])
+  }, [products, filter, search])
 
   const resetFilters = () => {
     setFilter('all')
@@ -31,12 +61,14 @@ export function useProducts() {
 
   return {
     products: filteredProducts,
+    allProducts: products,
     filter,
     search,
     setFilter,
     setSearch,
     resetFilters,
     totalCount: filteredProducts.length,
-    allProducts: products,
+    loading,
+    error,
   }
 }
