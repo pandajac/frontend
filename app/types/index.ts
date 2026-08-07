@@ -8,6 +8,7 @@ export interface Product {
   cat: string
   created_at?: string
   updated_at?: string
+  oldPrice?: number
 }
 
 export interface CartItem extends Product {

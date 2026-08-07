@@ -1,17 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
-import { signIn } from '@/app/actions/auth'
+import { Loader2, AlertCircle, CheckCircle, Mail } from 'lucide-react'
+import { resetPassword } from '@/app/actions/auth'
 
-export default function LoginPage() {
-  const router = useRouter()
+export default function RecuperarPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -20,20 +16,28 @@ export default function LoginPage() {
     e.preventDefault()
     setError(null)
     setSuccess(null)
+
+    if (!email.trim()) {
+      setError('El email es requerido')
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('El email no es válido')
+      return
+    }
+
     setLoading(true)
 
     const formData = new FormData()
     formData.append('email', email)
-    formData.append('password', password)
 
-    const result = await signIn(formData)
+    const result = await resetPassword(formData)
 
     if (result.error) {
       setError(result.error)
-    } else {
-      setSuccess('Ingresando...')
-      router.push('/catalogo')
-      router.refresh()
+    } else if (result.success) {
+      setSuccess(result.success)
     }
     setLoading(false)
   }
@@ -51,8 +55,8 @@ export default function LoginPage() {
               className="mx-auto"
             />
           </Link>
-          <h2 className="text-3xl font-black text-black">Iniciar sesión</h2>
-          <p className="mt-2 text-gray-600">Accede a tu cuenta para cotizar repuestos</p>
+          <h2 className="text-3xl font-black text-black">Recuperar contraseña</h2>
+          <p className="mt-2 text-gray-600">Te enviaremos un enlace para restablecer tu contraseña</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -71,8 +75,9 @@ export default function LoginPage() {
           )}
 
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <div className="px-4 py-3">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <Mail className="w-4 h-4 text-gray-400" />
                 Email
               </label>
               <input
@@ -88,42 +93,6 @@ export default function LoginPage() {
                 disabled={loading}
               />
             </div>
-
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Contraseña
-                </label>
-                <Link 
-                  href="/recuperar-password" 
-                  className="text-sm text-black hover:text-gray-700 font-medium transition-colors"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black sm:text-sm pr-10"
-                  placeholder="••••••••"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
           </div>
 
           <button
@@ -134,16 +103,16 @@ export default function LoginPage() {
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              'Iniciar sesión'
+              'Enviar enlace de recuperación'
             )}
           </button>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            ¿No tienes cuenta?{' '}
-            <Link href="/registro" className="font-medium text-black hover:text-gray-700 transition-colors">
-              Regístrate
+            ¿Recordaste tu contraseña?{' '}
+            <Link href="/login" className="font-medium text-black hover:text-gray-700 transition-colors">
+              Inicia sesión
             </Link>
           </p>
         </div>

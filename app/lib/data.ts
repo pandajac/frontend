@@ -128,6 +128,23 @@ export async function getCategoryCounts(): Promise<Record<string, number>> {
   return counts
 }
 
+export async function getProductById(id: number): Promise<Product | null> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error('Error fetching product by id:', error)
+    return null
+  }
+
+  return data
+}
+
 export async function getFeaturedProducts(): Promise<{
   bestSellers: Product[]
   onSale: Product[]

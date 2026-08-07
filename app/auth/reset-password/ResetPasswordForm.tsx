@@ -1,70 +1,68 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle, Shield } from 'lucide-react'
-import { signUp } from '@/app/actions/auth'
+import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle, Lock } from 'lucide-react'
+import { createClient } from '@/app/lib/supabase/client'
 
-export default function RegistroPage() {
+export function ResetPasswordForm() {
   const router = useRouter()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+  const searchParams = useSearchParams()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [validToken, setValidToken] = useState(true)
 
-  const validateForm = () => {
-    if (!fullName.trim()) {
-      setError('El nombre completo es requerido')
-      return false
-    }
-    if (!email.trim()) {
-      setError('El email es requerido')
-      return false
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('El email no es válido')
-      return false
-    }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      return false
-    }
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden')
-      return false
-    }
-    return true
-  }
+  useEffect(() => {
+    // Verify the token is valid by checking if we can get the session
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setValidToken(false)
+      }
+    })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSuccess(null)
 
-    if (!validateForm()) return
+    if (!password) {
+      setError('La contraseña es requerida')
+      return
+    }
+
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden')
+      return
+    }
 
     setLoading(true)
 
-    const formData = new FormData()
-    formData.append('email', email)
-    formData.append('password', password)
-    formData.append('fullName', fullName)
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({
+      password,
+    })
 
-    const result = await signUp(formData)
-
-    if (result.error) {
-      setError(result.error)
-    } else if (result.success) {
-      setSuccess(result.success)
+    if (error) {
+      setError(error.message)
+    } else {
+      setSuccess('Contraseña actualizada correctamente. Redirigiendo...')
       setTimeout(() => {
         router.push('/login')
-      }, 3000)
+        router.refresh()
+      }, 2000)
     }
     setLoading(false)
   }
@@ -83,6 +81,19 @@ export default function RegistroPage() {
   const strengthLabels = ['Muy débil', 'Débil', 'Media', 'Fuerte', 'Muy fuerte']
   const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500']
 
+  if (!validToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 text-sm" role="alert">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>Enlace inválido o expirado. <Link href="/recuperar-password" className="underline">Solicita uno nuevo</Link></span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -96,8 +107,8 @@ export default function RegistroPage() {
               className="mx-auto"
             />
           </Link>
-          <h2 className="text-3xl font-black text-black">Crear cuenta</h2>
-          <p className="mt-2 text-gray-600">Únete para acceder a precios de liquidación</p>
+          <h2 className="text-3xl font-black text-black">Restablecer contraseña</h2>
+          <p className="mt-2 text-gray-600">Ingresa tu nueva contraseña</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -117,45 +128,9 @@ export default function RegistroPage() {
 
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm space-y-0 divide-y divide-gray-100">
             <div className="px-4 py-3">
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                Nombre completo
-              </label>
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                autoComplete="name"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black sm:text-sm"
-                placeholder="Juan Pérez"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="px-4 py-3">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black sm:text-sm"
-                placeholder="tu@email.com"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="px-4 py-3">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                Contraseña
-                <Shield className="w-4 h-4 text-gray-400" />
+                Nueva contraseña
+                <Lock className="w-4 h-4 text-gray-400" />
               </label>
               <div className="relative mt-1">
                 <input
@@ -180,7 +155,6 @@ export default function RegistroPage() {
                 </button>
               </div>
               
-              {/* Password strength indicator */}
               {password && (
                 <div className="mt-2">
                   <div className="flex gap-1 h-1.5">
@@ -200,7 +174,7 @@ export default function RegistroPage() {
 
             <div className="px-4 py-3">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmar contraseña
+                Confirmar nueva contraseña
               </label>
               <div className="relative mt-1">
                 <input
@@ -229,13 +203,6 @@ export default function RegistroPage() {
             </div>
           </div>
 
-          <p className="text-xs text-gray-500 text-center">
-            Al registrarte, aceptas nuestros{' '}
-            <Link href="/terminos" className="text-black hover:text-gray-700 underline">Términos y Condiciones</Link>
-            {' '}y{' '}
-            <Link href="/privacidad" className="text-black hover:text-gray-700 underline">Política de Privacidad</Link>
-          </p>
-
           <button
             type="submit"
             disabled={loading}
@@ -244,14 +211,14 @@ export default function RegistroPage() {
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              'Crear cuenta'
+              'Actualizar contraseña'
             )}
           </button>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            ¿Ya tienes cuenta?{' '}
+            ¿Recordaste tu contraseña?{' '}
             <Link href="/login" className="font-medium text-black hover:text-gray-700 transition-colors">
               Inicia sesión
             </Link>
