@@ -6,6 +6,7 @@ import { Package, Cpu, Car, Settings, Filter as FilterIcon, Plus } from 'lucide-
 
 interface ProductCardProps {
   product: Product
+  onAddToCart?: (productId: number) => void
 }
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -19,7 +20,7 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   'Dirección': Settings,
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { addToCart } = useCart()
   const Icon = categoryIcons[product.cat] || Settings
 
@@ -28,7 +29,11 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   const handleAddToCart = () => {
-    addToCart(product)
+    if (onAddToCart) {
+      onAddToCart(product.id)
+    } else {
+      addToCart(product)
+    }
   }
 
   return (

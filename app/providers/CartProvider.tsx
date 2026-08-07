@@ -3,12 +3,27 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 import { Product, CartItem } from '@/app/types'
 
+interface AddToCartProduct {
+  id: number
+  descripcion?: string
+  referencia?: string | null
+  existencia?: number
+  costo_unidad?: number
+  model?: string
+  cat?: string
+  name?: string
+  price?: number
+  image?: string
+  category?: string
+  oldPrice?: number
+}
+
 interface CartContextType {
   cart: CartItem[]
   isOpen: boolean
   totalItems: number
   totalPrice: number
-  addToCart: (product: Product) => void
+  addToCart: (product: AddToCartProduct) => void
   removeFromCart: (id: number) => void
   updateQuantity: (id: number, change: number) => void
   clearCart: () => void
@@ -23,11 +38,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: AddToCartProduct) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id)
+      const descripcion = product.descripcion || product.name || 'Producto'
+      const costo_unidad = product.costo_unidad || product.price || 0
+      const existencia = product.existencia || 999
+      
       if (existing) {
-        if (existing.quantity < product.existencia) {
+        if (existing.quantity < existencia) {
           return prev.map(item =>
             item.id === product.id
               ? { ...item, quantity: item.quantity + 1 }
@@ -36,7 +55,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
         return prev
       }
-      return [...prev, { ...product, quantity: 1 }]
+      return [...prev, { 
+        ...product, 
+        descripcion, 
+        costo_unidad, 
+        existencia,
+        referencia: product.referencia || null,
+        model: product.model || '',
+        cat: product.cat || '',
+        quantity: 1 
+      } as CartItem]
     })
     setIsOpen(true) // Auto-abrir carrito al agregar
   }
