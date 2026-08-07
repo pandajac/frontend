@@ -1,6 +1,6 @@
 'use client'
 
-import { useCart } from '@/app/hooks/useCart'
+import { useCart } from '@/app/providers/CartProvider'
 import { ShoppingBag, X, ShoppingCart, Minus, Plus, Trash2, MessageSquare } from 'lucide-react'
 
 export function CartDrawer() {

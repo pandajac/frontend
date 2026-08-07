@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CartProvider } from './providers/CartProvider'
-import { useCart } from './hooks/useCart'
+import { CartProvider, useCart } from './providers/CartProvider'
 import { useProducts } from './hooks/useProducts'
 import { Navbar } from './components/Navbar'
 import { Header } from './components/Header'

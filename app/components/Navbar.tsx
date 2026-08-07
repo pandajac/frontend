@@ -1,8 +1,9 @@
 'use client'
 
-import { useCart } from '@/app/hooks/useCart'
+import { useCart } from '@/app/providers/CartProvider'
 import { SearchBar } from './SearchBar'
-import { Square, ShoppingBag } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
+import Image from 'next/image'
 
 interface NavbarProps {
   search: string
@@ -19,18 +20,14 @@ export function Navbar({ search, onSearchChange, mobileSearch, onMobileSearchCha
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-            <div className="bg-black text-white p-2 rounded-lg shadow-sm">
-              <Square className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-2xl tracking-tighter uppercase leading-none">
-                PANDA<span className="text-gray-400">JAC</span>
-              </span>
-              <span className="text-[10px] text-gray-500 tracking-widest uppercase font-semibold">
-                Liquidación Directa
-              </span>
-            </div>
+          <div className="flex-shrink-0 flex items-center cursor-pointer">
+            <Image
+              src="/assets/img/logo/logo_name.png"
+              alt="PandaJAC"
+              width={140}
+              height={40}
+              className="h-10 w-auto"
+            />
           </div>
           
           {/* Desktop Search */}

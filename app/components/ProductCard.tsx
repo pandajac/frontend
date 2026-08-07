@@ -1,7 +1,7 @@
 'use client'
 
 import { Product } from '@/app/types'
-import { useCart } from '@/app/hooks/useCart'
+import { useCart } from '@/app/providers/CartProvider'
 import { Package, Cpu, Car, Settings, Filter as FilterIcon, Plus } from 'lucide-react'
 
 interface ProductCardProps {
