@@ -195,48 +195,58 @@ const ProductCarousel = ({ title, products, onAdd }: ProductCarouselProps) => {
 
 // ----- PromoBanner -----
 const PromoBanner = () => {
-  const [ref, inView] = useInView({ triggerOnce: true, rootMargin: '100px' })
+  const targetDate = useMemo(() => new Date().getTime() + 7 * 24 * 60 * 60 * 1000, [])
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date().getTime()
+      const diff = targetDate - now
+      if (diff <= 0) {
+        clearInterval(interval)
+        return
+      }
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [targetDate])
 
   return (
-    <motion.section ref={ref} className="py-16 bg-gray-50" initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5 }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative bg-black rounded-3xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black" />
-          <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs>
-                <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5" />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#grid)" />
-            </svg>
+    <section className="relative bg-gradient-to-r from-indigo-900 to-purple-800 text-white py-16 overflow-hidden">
+      <div className="absolute inset-0 opacity-10" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <span className="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-semibold mb-4">
+            🔥 Oferta Especial
+          </span>
+          <h2 className="text-3xl md:text-5xl font-black mb-2">¡No te lo pierdas!</h2>
+          <p className="text-lg md:text-xl text-white/80 mb-8">Hasta 30% de descuento en repuestos seleccionados</p>
+          <div className="flex justify-center gap-4 flex-wrap">
+            {Object.entries(timeLeft).map(([unit, value]) => (
+              <div key={unit} className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 min-w-[70px]">
+                <div className="text-2xl md:text-4xl font-mono font-bold">{String(value).padStart(2, '0')}</div>
+                <div className="text-xs uppercase tracking-wider text-white/70">{unit}</div>
+              </div>
+            ))}
           </div>
-          <div className="relative py-16 px-8 md:px-16 text-center md:text-left">
-            <div className="max-w-2xl">
-              <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur rounded-full text-white text-sm font-semibold mb-4 border border-white/20">
-                🚛 Envío Gratis en órdenes +$150.000
-              </span>
-              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
-                Precios de Mayorista <br /><span className="text-yellow-400">Para tu Taller</span>
-              </h2>
-              <p className="text-white/80 text-lg md:text-xl mb-8 max-w-lg">
-                Accede a inventario directo de fábrica. Sin intermediarios, sin mínimos de compra.
-              </p>
-              <Link
-                href="/catalogo"
-                className="inline-flex items-center gap-2 bg-yellow-400 text-black font-bold px-8 py-4 rounded-xl hover:bg-yellow-300 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Ver Catálogo Completo
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </div>
+          <motion.div whileHover={{ scale: 1.05 }} className="mt-8">
+            <Link href="/catalogo" className="inline-block bg-white text-black px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition">
+              Ver ofertas
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
-    </motion.section>
+    </section>
   )
 }
 

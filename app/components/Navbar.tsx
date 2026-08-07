@@ -76,33 +76,35 @@ export function Navbar() {
             />
           </div>
           
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex lg:items-center lg:gap-1 flex-1 max-w-3xl mx-8 justify-center">
-            {navLinks.map((link) => {
-              const Icon = link.icon
-              return (
-                <Link
-                  key={link.id}
-                  href={link.href}
-                  className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-200 group"
-                >
-                  <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  {link.label}
-                </Link>
-              )
-            })}
-          </div>
-
-          {/* Right side actions */}
-          <div className="flex items-center gap-2 lg:gap-3">
-            {/* Search Form */}
-            <form onSubmit={handleSearchSubmit} className="hidden lg:block flex-1 max-w-lg">
+          {/* Search Form - LEFT side */}
+          <div className="hidden lg:block flex-1 max-w-xl mx-8">
+            <form onSubmit={handleSearchSubmit}>
               <SearchBar
                 value={searchValue}
                 onChange={setSearchValue}
                 placeholder="Buscar por repuesto o referencia..."
               />
             </form>
+          </div>
+
+          {/* Right side actions - Navigation links + CTA + Cart */}
+          <div className="flex items-center gap-2 lg:gap-3">
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex lg:items-center lg:gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon
+                return (
+                  <Link
+                    key={link.id}
+                    href={link.href}
+                    className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-200 group"
+                  >
+                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </div>
 
             {/* Quote CTA */}
             <Link
