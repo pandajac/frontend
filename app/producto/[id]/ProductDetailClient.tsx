@@ -24,6 +24,10 @@ import { useCart } from '@/app/providers/CartProvider'
 import { useToast } from '@/app/providers/ToastProvider'
 import { motion, AnimatePresence } from 'framer-motion'
 
+interface ProductDetailClientProps {
+  product: Product
+}
+
 // ----- Subcomponente: Galería con miniaturas y zoom -----
 interface ImageGalleryProps {
   productId: number
@@ -300,7 +304,7 @@ const RelatedProductCard = ({ product }: { product: Product }) => {
         <h4 className="font-semibold text-gray-800 truncate">{product.descripcion}</h4>
         <div className="flex items-center justify-between mt-2">
           <span className="text-lg font-bold text-black">
-            ${product.costo_unidad.toFixed(2)}
+            ${product.costo_unidad.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
           <button
             onClick={() => {
@@ -419,12 +423,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   // Productos relacionados (simulados con el mismo producto pero podrías pasarlos desde props)
   const relatedProducts = useMemo(
     () =>
-      Array.from({ length: 4 }, (_, i) => ({
-        ...product,
-        id: product.id + i + 100,
-        descripcion: `${product.descripcion} - Relacionado ${i + 1}`,
-        costo_unidad: product.costo_unidad * (0.8 + Math.random() * 0.4),
-      })),
+      Array.from({ length: 4 }, (_, i) => {
+        // Deterministic pseudo-random based on product.id and index
+        const seed = (product.id * 1000 + i * 17) % 1000
+        const randomFactor = 0.8 + (seed / 1000) * 0.4
+        return {
+          ...product,
+          id: product.id + i + 100,
+          descripcion: `${product.descripcion} - Relacionado ${i + 1}`,
+          costo_unidad: product.costo_unidad * randomFactor,
+        }
+      }),
     [product]
   )
 

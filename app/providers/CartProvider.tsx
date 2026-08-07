@@ -16,6 +16,7 @@ interface AddToCartProduct {
   image?: string
   category?: string
   oldPrice?: number
+  quantity?: number
 }
 
 interface CartContextType {
