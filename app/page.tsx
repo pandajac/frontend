@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { CartProvider, useCart } from './providers/CartProvider'
 import { useProducts } from './hooks/useProducts'
 import { Navbar } from './components/Navbar'
-import { Header } from './components/Header'
+import { HeroCarousel } from './components/HeroCarousel'
 import { Footer } from './components/Footer'
 import { FilterSidebar } from './components/FilterSidebar'
 import { ProductGrid } from './components/ProductGrid'
@@ -49,7 +49,7 @@ function HomeContent() {
         mobileSearch={mobileSearch}
         onMobileSearchChange={handleMobileSearchChange}
       />
-      <Header />
+      <HeroCarousel />
       
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex flex-col md:flex-row gap-8">
         <FilterSidebar currentFilter={filter} onFilterChange={setFilter} />
